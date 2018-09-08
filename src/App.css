@@ -1,8 +1,18 @@
-.header {
-  height: 4vh;
-  width: 100vw;
+.sidebar {
+  float: left;
+  height: 100vh;
+  width: 25vw;
+  overflow: hidden;
+}
+.sidebar p {
+  padding: 5px 10px;
 }
 .mapbox-container {
-  width: 100vw;
-  height: 96vh;
+  float: left;
+  height: 100vh;
+  width: 75vw;
+}
+ul.cellList {
+  overflow: hidden;
+  overflow-y: scroll
 }

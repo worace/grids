@@ -41,20 +41,18 @@ class App extends Component {
   render() {
     return (
       <div>
-        <div className="header">
+        <div ref={mc => this.mapContainer = mc} className="mapbox-container" />
+        <div className="sidebar">
           <p>
             <span>Grid Type: {this.state.gridType}</span>
+          </p>
+          <p>
             <span>Resolution: {this.state.resolution}</span>
+          </p>
+          <p>
             <span>Lat/Lon: {this.lat()}, {this.lon()}</span>
-            <span>Current Cell: {this.h3Index()}</span>
-            <span>kRing:
-              <input onChange={this.kRingUpdated.bind(this)}
-                     value={this.state.kRing}
-                     type="range"
-                     min="0"
-                     max="10"
-                     step="1" />
-            </span>
+          </p>
+          <p>
             <span>Resolution:
               <input onChange={this.resolutionUpdated.bind(this)}
                      value={this.state.resolution}
@@ -64,20 +62,45 @@ class App extends Component {
                      step="1" />
             </span>
           </p>
+          <p>
+            <span>kRing:
+              <input onChange={this.kRingUpdated.bind(this)}
+                     value={this.state.kRing}
+                     type="range"
+                     min="0"
+                     max="10"
+                     step="1" />
+            </span>
+          </p>
+          <p>
+            <span>Current Cell: {this.h3Index()}</span>
+          </p>
+          <p>
+            Cells
+          </p>
+          <ul className="cellList">{this.cellListItems()}</ul>
         </div>
-        <div ref={mc => this.mapContainer = mc} className="mapbox-container" />
         </div>
     );
+  }
+  cellListItems() {
+    return this.activeCells().map(c => {
+      return (
+        <li key={c}>{c}</li>
+      )
+    });
+  }
+
+  componentDidUpdate() {
+    this.updateMapSource();
   }
 
   kRingUpdated(event) {
     this.setState({kRing: event.target.value});
-    this.updateMapSource();
   }
 
   resolutionUpdated(event) {
     this.setState({resolution: event.target.value});
-    this.updateMapSource();
   }
 
   componentDidMount() {
@@ -91,18 +114,14 @@ class App extends Component {
     this.map.on('click', this.mapClicked.bind(this));
   }
 
+  activeCells() {
+    return h3.kRing(this.h3Index(), this.state.kRing);
+  }
+
   cellsSourceData() {
-    console.log(this.state);
-    if (this.state.kRing > 0) {
-      const center = this.h3Index();
-      const cells = h3.kRing(center, this.state.kRing);
-      const features = cells.map(this.cellGeoJson)
-      return {type: 'FeatureCollection',
-              features: features};
-    } else {
-      return {type: 'FeatureCollection',
-              features: [this.cellGeoJson(this.h3Index())]};
-    }
+    const features = this.activeCells().map(this.cellGeoJson)
+    return {type: 'FeatureCollection',
+            features: features};
   }
 
   updateMapSource() {

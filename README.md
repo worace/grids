@@ -7,4 +7,3 @@
 * Add geometry and tile at given resolution
 * Copy cells as GeoJSON / WKT
 * Geocode search (quick map navigation)
-* 
