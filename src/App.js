@@ -13,7 +13,8 @@ class App extends Component {
     this.state = {
       gridType: "h3",
       resolution: 9,
-      center: [-118.2437, 34.0522]
+      center: [-118.2437, 34.0522],
+      kRing: 0
     }
   };
 
@@ -25,15 +26,9 @@ class App extends Component {
     return h3.geoToH3(this.lat(), this.lon(), this.res());
   }
 
-  cellGeoJson() {
-    const bounds = h3.h3ToGeoBoundary(this.h3Index());
-    console.log('size');
-    console.log(bounds.length);
-    console.log("push back");
-    console.log(bounds[bounds.length - 1])
+  cellGeoJson(index) {
+    const bounds = h3.h3ToGeoBoundary(index);
     bounds.push(bounds[bounds.length - 1].slice(0));
-    console.log('size');
-    console.log(bounds.length);
     const coords = bounds.forEach(b => b.reverse());
     return {type: 'Feature',
             properties: {},
@@ -52,11 +47,24 @@ class App extends Component {
             <span>Resolution: {this.state.resolution}</span>
             <span>Lat/Lon: {this.lat()}, {this.lon()}</span>
             <span>Current Cell: {this.h3Index()}</span>
+            <span>kRing:
+              <input onChange={this.kRingUpdated.bind(this)}
+                     value={this.state.kRing}
+                     type="range"
+                     min="0"
+                     max="10"
+                     step="1" />
+            </span>
           </p>
         </div>
         <div ref={mc => this.mapContainer = mc} className="mapbox-container" />
         </div>
     );
+  }
+
+  kRingUpdated(event) {
+    this.setState({kRing: event.target.value});
+    this.updateMapSource();
   }
 
   componentDidMount() {
@@ -69,13 +77,30 @@ class App extends Component {
     this.map.on('load', this.mapLoaded.bind(this))
   }
 
+  cellsSourceData() {
+    console.log(this.state);
+    if (this.state.kRing > 0) {
+      const center = this.h3Index();
+      const cells = h3.kRing(center, this.state.kRing);
+      const features = cells.map(this.cellGeoJson)
+      return {type: 'FeatureCollection',
+              features: features};
+    } else {
+      return {type: 'FeatureCollection',
+              features: [this.cellGeoJson(this.h3Index())]};
+    }
+  }
+
+  updateMapSource() {
+    this.map.getSource('cells').setData(this.cellsSourceData());
+  }
+
   mapLoaded() {
     console.log('*** Map Loaded ***');
-    console.log(this.cellGeoJson());
     this.map.addSource('cells',
                        {type: 'geojson',
-                        data: this.cellGeoJson()});
-    console.log(JSON.stringify(this.cellGeoJson()));
+                        data: this.cellsSourceData()});
+
     this.map.addLayer({
       id: 'cells-fill',
       type: 'fill',
