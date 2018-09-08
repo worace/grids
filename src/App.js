@@ -74,7 +74,8 @@ class App extends Component {
       zoom: 16,
       center: this.state.center
     });
-    this.map.on('load', this.mapLoaded.bind(this))
+    this.map.on('load', this.mapLoaded.bind(this));
+    this.map.on('click', this.mapClicked.bind(this));
   }
 
   cellsSourceData() {
@@ -110,6 +111,12 @@ class App extends Component {
         'fill-opacity': 0.6
       }
     });
+  }
+
+  mapClicked(event) {
+    const {lng, lat} = event.lngLat;
+    this.setState({center: [lng, lat]});
+    this.updateMapSource();
   }
 }
 
