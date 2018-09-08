@@ -55,6 +55,14 @@ class App extends Component {
                      max="10"
                      step="1" />
             </span>
+            <span>Resolution:
+              <input onChange={this.resolutionUpdated.bind(this)}
+                     value={this.state.resolution}
+                     type="range"
+                     min="1"
+                     max="15"
+                     step="1" />
+            </span>
           </p>
         </div>
         <div ref={mc => this.mapContainer = mc} className="mapbox-container" />
@@ -64,6 +72,11 @@ class App extends Component {
 
   kRingUpdated(event) {
     this.setState({kRing: event.target.value});
+    this.updateMapSource();
+  }
+
+  resolutionUpdated(event) {
+    this.setState({resolution: event.target.value});
     this.updateMapSource();
   }
 
