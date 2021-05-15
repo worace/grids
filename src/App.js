@@ -57,7 +57,7 @@ class App extends Component {
               <input onChange={this.resolutionUpdated.bind(this)}
                      value={this.state.resolution}
                      type="range"
-                     min="1"
+                     min="0"
                      max="15"
                      step="1" />
             </span>
